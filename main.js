@@ -16,6 +16,7 @@
   const TYPES          = _g.TYPES          || FALLBACK_TYPES;
   const runDungeonGen  = _g.runDungeonGen;
   const generateReading = _g.generateReading;
+  const punchlineFor   = _g.punchlineFor   || (() => "");
 
   if (!window.MBTIDungeon) {
     console.error("game.js のロードに失敗しました");
@@ -80,7 +81,7 @@
         partnerType: r.partner.type, partnerName: r.partner.name,
         archetype: r.synergy.archetype.name,
         style: r.relStyle?.label || "",
-        score: r.synergy.blendedScore || r.synergy.score,
+        score: r.synergy.score,
         rank: r.rank?.label || "C",
         cleared: r.cleared,
         ts: Date.now(),
@@ -259,15 +260,12 @@
     });
 
     $("next-btn").classList.add("hidden");
-    $("run-spinner").classList.remove("hidden");
-    currentReading = await generateReading(result);
-    $("run-spinner").classList.add("hidden");
+    currentReading = await generateReading(result); // 既定はテンプレ鑑定（即時・$0）
 
     drawResultCard(result, currentReading.text);
     drawRankDisplay(result);
     drawReadingSections(currentReading);
-    $("reading-source").textContent =
-      currentReading.source === "gemini" ? "" : "※APIキー未設定のため簡易鑑定で表示中";
+    $("reading-source").textContent = ""; // 簡易鑑定が既定。詳細鑑定は将来の広告ゲートで提供
     show("screen-result");
   }
 
@@ -288,7 +286,7 @@
     ctx.strokeRect(20, 20, W - 40, H - 40);
 
     const rank  = result.rank || { label: "C", color: "#a99fc4", desc: "要努力な相性" };
-    const score = result.synergy.blendedScore || result.synergy.score;
+    const score = result.synergy.score; // v2: 型ペア固定の相性スコア（OG/SEOと一致）
 
     // ヘルパー：横区切り線
     const divider = (y, alpha = 0.09) => {
@@ -357,12 +355,13 @@
 
     divider(480);
 
-    // ⑥ 鑑定サマリー（読みやすい短さに限定）
-    const shortText = readingText.length > 95 ? readingText.slice(0, 93) + "…" : readingText;
-    ctx.fillStyle   = "#c0b8d0";
-    ctx.font        = "15px sans-serif";
+    // ⑥ 決めゼリフ（シェアの主役・決定論。readingTextではなくpunchlineを出す）
+    const punch = punchlineFor(result.self.type, result.partner.type, result.synergy) ||
+                  (readingText.length > 95 ? readingText.slice(0, 93) + "…" : readingText);
+    ctx.fillStyle   = "#e7defa";
+    ctx.font        = "bold 18px sans-serif";
     ctx.textAlign   = "left";
-    wrapText(ctx, shortText, 52, 508, W - 104, 26);
+    wrapText(ctx, `“${punch}”`, 52, 506, W - 104, 28);
 
     // ⑦ ハッシュタグ
     ctx.textAlign = "center";
@@ -376,13 +375,13 @@
     const el = $("rank-display");
     if (!el) return;
     const r = result.rank || { label: "C", color: "#a99fc4", desc: "要努力な相性" };
-    const score = result.synergy.blendedScore || result.synergy.score;
+    const score = result.synergy.score; // v2: 型ペア固定の相性スコア
     el.style.borderColor = r.color;
     el.innerHTML = `
       <span class="rank-letter" style="color:${r.color};text-shadow:0 0 32px ${r.color}88">${r.label}</span>
       <span class="rank-label-text" style="color:${r.color}">RANK</span>
       <span class="rank-desc-text" style="color:${r.color}">${r.desc}</span>
-      <span class="rank-score-text">統合スコア ${score} / 100</span>
+      <span class="rank-score-text">相性スコア ${score} / 100</span>
     `;
     el.classList.remove("hidden");
   }
@@ -399,6 +398,16 @@
         <div class="reading-card" style="border-left:3px solid #a78bfa;background:rgba(167,139,250,0.07)">
           <div class="reading-card-label" style="color:#a78bfa">🎭 関係スタイル</div>
           <div class="reading-card-body"><strong>${rs.label}</strong><br /><span style="color:var(--muted);font-size:13px">${rs.desc || ""}</span></div>
+        </div>`);
+    }
+
+    // §8: 今回の名シーン（道中の選択を振り返る＝シェア燃料）
+    const hl = currentResult && currentResult.highlight;
+    if (hl) {
+      sec.insertAdjacentHTML("beforeend", `
+        <div class="reading-card" style="border-left:3px solid #c98a4b;background:rgba(201,138,75,0.07)">
+          <div class="reading-card-label" style="color:#c98a4b">🎬 今回の名シーン</div>
+          <div class="reading-card-body">「${hl.prompt}」<br />→ <strong>${hl.choice}</strong><br /><span style="color:var(--muted);font-size:13px">${hl.result}</span></div>
         </div>`);
     }
 
@@ -436,13 +445,29 @@
   }
 
   // --- シェア / 保存 / リトライ ---------------------------------------------
-  $("share-btn").addEventListener("click", () => {
-    const r       = currentResult;
-    const outcome   = r.cleared ? "踏破！" : `${r.reachedFloor}階まで到達`;
-    const style     = r.relStyle ? `×「${r.relStyle.label}」` : "";
-    const rankLabel = r.rank ? `【${r.rank.label}ランク】` : "";
-    const text      = `${rankLabel}${r.self.name}(${r.self.type})×${r.partner.name}(${r.partner.type})は「${r.synergy.archetype.name}」${style}。相性ダンジョン、${outcome}\n2人でクリアできる？`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&hashtags=相性ダンジョン`, "_blank");
+  $("share-btn").addEventListener("click", async () => {
+    const r     = currentResult;
+    const punch = punchlineFor(r.self.type, r.partner.type, r.synergy);
+    // 拡散単位は「型ペア」。決定論の /type/A-B を共有 → リンクに動的OG画像が出る
+    const url   = `${location.origin}/type/${r.self.type}-${r.partner.type}`;
+    const head  = punch || `${r.self.type}×${r.partner.type}は「${r.synergy.archetype.name}」。`;
+    const text  = `${head}\nあなたの相性は？ #相性ダンジョン`;
+
+    // モバイル等はOSの共有シート（Xアプリが既ログインで開く＝ログイン壁を回避）
+    if (navigator.share) {
+      try {
+        await navigator.share({ text, url });
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return; // ユーザーが共有をキャンセル
+        // それ以外（未対応など）は下のフォールバックへ
+      }
+    }
+    // デスクトップ等は X(Twitter) の投稿画面（※Xにログイン済みである必要あり）
+    window.open(
+      `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      "_blank", "noopener,noreferrer"
+    );
   });
 
   $("save-btn").addEventListener("click", () => {

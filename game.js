@@ -101,7 +101,8 @@ function analyzeSynergy(typeA, typeB) {
   // 構造上の上限: 各タイプは強い家族(str>=3)を2つだけ持つので
   //   complement / resonance は 0〜2、blind は 0〜1 にしかならない。
   // スコア(5〜98): 補完・支え合いが高評価、死角は減点
-  let score = 50 + complement * 16 + support * 8 + resonance * 3 - blind * 14 - thin * 3;
+  // ⚠ lib/verdict.mjs（OG画像・SEOページ）と同一式に揃えること（in-app/共有でスコア一致）。
+  let score = 50 + complement * 16 + support * 8 + resonance * 3 - blind * 14;
   score = Math.max(5, Math.min(98, score));
 
   // 壁(ボス) = 2人が最も弱い家族（共に苦手なこと）
@@ -160,40 +161,40 @@ function buildParty(self, partner) {
 
 // --- 敵 = 関係の壁（家族ごと）--------------------------------------------
 const ENEMIES = {
-  N: { name: "マンネリの檻", desc: "いつも通りに2人を閉じ込める", hp: 70, atk: 12, hint: "将来像を一緒に描けるか" },
-  S: { name: "地に足つかずの靄", desc: "現実を見失わせる", hp: 72, atk: 12, hint: "目の前の具体を詰められるか" },
-  T: { name: "優柔の渦", desc: "決めきれない2人を飲み込む", hp: 78, atk: 11, hint: "はっきり線を引けるか" },
-  F: { name: "倦怠の影", desc: "気持ちのケアを忘れた2人を試す", hp: 66, atk: 14, hint: "相手の感情に寄り添えるか" },
+  N: { name: "「で、私たちどうなるの？」の門番", desc: "将来の話を避け続けた二人の前に立ちはだかる", hp: 70, atk: 12, hint: "二人の“この先”を言葉にできるか" },
+  S: { name: "地に足つかずフワフワ妖怪", desc: "夢ばかりで現実を見ない二人を試す", hp: 72, atk: 12, hint: "目の前の現実を二人で片づけられるか" },
+  T: { name: "「どっちでもいい」無限ループ沼", desc: "決められない二人を静かに飲み込む", hp: 78, atk: 11, hint: "二人ではっきり決めきれるか" },
+  F: { name: "言わなきゃ伝わらないオバケ", desc: "気持ちのケアを後回しにした二人を襲う", hp: 66, atk: 14, hint: "素直に気持ちを伝え合えるか" },
 };
 
-// 雑魚（fam で見た目の色が変わる）
+// 雑魚（fam で見た目の色が変わる）= 関係の小さなすれ違いあるある
 const MOBS = [
-  { name: "迷いの霧",       hp: 40, atk: 9,  fam: "N" },
-  { name: "すれ違いの影",   hp: 48, atk: 10, fam: "F" },
-  { name: "気まずさの粒",   hp: 35, atk: 8,  fam: "S" },
-  { name: "既読スルーの亡霊", hp: 44, atk: 11, fam: "F" },
-  { name: "沈黙のスライム", hp: 52, atk: 7,  fam: "T" },
-  { name: "束縛のツタ",     hp: 46, atk: 10, fam: "S" },
-  { name: "嫉妬の火の粉",   hp: 38, atk: 13, fam: "F" },
-  { name: "マウントの小鬼", hp: 42, atk: 12, fam: "T" },
-  { name: "見栄の蜃気楼",   hp: 40, atk: 11, fam: "N" },
+  { name: "未読のまま3日経過した影",       hp: 44, atk: 11, fam: "F" },
+  { name: "既読スルーの亡霊",             hp: 44, atk: 11, fam: "F" },
+  { name: "「今どこ？」催促スライム",       hp: 48, atk: 10, fam: "S" },
+  { name: "予定をギリギリまで決めない霧",   hp: 40, atk: 9,  fam: "N" },
+  { name: "正論で殴ってくる小鬼",          hp: 42, atk: 12, fam: "T" },
+  { name: "マウント取りたがりの妖精",       hp: 42, atk: 12, fam: "T" },
+  { name: "昔の話を蒸し返す亡者",          hp: 46, atk: 10, fam: "S" },
+  { name: "「なんでもいい」のち不機嫌の幻", hp: 38, atk: 13, fam: "F" },
+  { name: "見栄の蜃気楼",                 hp: 40, atk: 11, fam: "N" },
 ];
 
 // 中ボス（道中に1回出る、雑魚とボスの中間）
 const MINIBOSSES = [
-  { name: "倦怠の使い",   hp: 95,  atk: 15, fam: "F", desc: "慣れた関係に忍び寄る" },
-  { name: "干渉の番人",   hp: 105, atk: 13, fam: "T", desc: "踏み込みすぎを咎める" },
-  { name: "不安の双子",   hp: 90,  atk: 16, fam: "N", desc: "見えない先を不安にさせる" },
-  { name: "慣れの大蛇",   hp: 110, atk: 12, fam: "S", desc: "刺激のなさで締めつける" },
+  { name: "記念日を忘れた罪の番人",   hp: 95,  atk: 15, fam: "F", desc: "うっかりを見逃さない" },
+  { name: "返信遅いと不安になる双子", hp: 90,  atk: 16, fam: "N", desc: "既読の“間”で心を揺らす" },
+  { name: "正論パンチの審判",         hp: 105, atk: 13, fam: "T", desc: "正しさで殴ってくる" },
+  { name: "マンネリ大蛇",             hp: 110, atk: 12, fam: "S", desc: "“いつメン”の刺激のなさで締めつける" },
 ];
 
 // ランの導入ナレーション（関係タイプで変わる）
 const STORY_INTROS = {
-  dual:      "ここは『補完の回廊』。正反対の二人だけが、その扉を開けられる。",
-  twin:      "ここは『鏡の塔』。よく似た二人を映し、同じ弱みを突いてくる。",
-  yin_yang:  "ここは『凸凹洞窟』。デコボコな二人の歩幅が試される。",
-  blindspot: "ここは『死角の迷宮』。二人が見落としがちな場所に、罠が潜む。",
-  mix:       "ここは『調和の遺跡』。バランスの取れた二人の真価が問われる。",
+  dual:      "正反対の二人が挑む『補完の回廊』。「なんで分かってくれないの」を越えた先に、最強のコンビが待つ。",
+  twin:      "よく似た二人が映る『鏡の塔』。「それな」で通じ合うが、同じ落とし穴も二人で待っている。",
+  yin_yang:  "凸凹な二人の『凸凹洞窟』。片方がアクセル、片方がブレーキ。歩幅が合うかが試される。",
+  blindspot: "似た二人が挑む『死角の迷宮』。お互い見えていない場所に、罠は仕掛けられている。",
+  mix:       "バランス型の二人の『調和の遺跡』。名コンビにも珍道中にもなる、その真価が問われる。",
 };
 
 // --- Phase A/B: 行動プロファイル・動的難易度エンジン ----------------------
@@ -293,60 +294,59 @@ function generateDungeon(party, rng) {
 // tags: 選択が示す関係の振る舞いを5軸で蓄積（Phase A）
 const EVENTS = [
   {
-    prompt: "分かれ道。安全な遠回りと、危険な近道。",
+    prompt: "片方がへこんでいる。どうする？",
     choices: [
-      { label: "安全な遠回り", tags: { 安定: 2 }, effect: (p) => { p.hp = Math.min(p.maxHp, p.hp + 15); }, log: "安全策を選び、英気を養った" },
-      { label: "危険な近道",   tags: { 冒険: 2 }, effect: (p) => { p.atk += 6; p.hp -= 8; }, log: "近道を選んだ。攻めの姿勢が火力に、でも少し消耗した" },
+      { label: "一緒に解決策を考える", tags: { 対話: 2 },              effect: (p) => { p.atk += 5; p.crit += 5; }, log: "並んで解決策を出した。前向きさが攻めを鋭くした" },
+      { label: "何も言わず隣にいる",   tags: { 思いやり: 2, 素直さ: 1 }, effect: (p) => { p.heal += 8; }, log: "ただ黙って隣にいた。その温もりが回復力になった" },
     ],
   },
   {
-    prompt: "片方が弱音を吐いた。",
+    prompt: "旅行の計画、どう立てる？",
     choices: [
-      { label: "そっと寄り添う", tags: { 思いやり: 2, 素直さ: 1 }, effect: (p) => { p.heal += 8; }, log: "寄り添った。心の支えが回復力になった" },
-      { label: "発破をかける",   tags: { 冒険: 1 },              effect: (p) => { p.atk += 5; p.crit += 5; }, log: "発破をかけた。前向きさが攻撃を鋭くした" },
+      { label: "分単位のしおりを作る", tags: { 安定: 2 }, effect: (p) => { p.def += 6; p.heal += 3; }, log: "完璧なしおりを用意。備えが守りを固めた" },
+      { label: "現地でなんとかする",   tags: { 冒険: 2 }, effect: (p) => { p.atk += 6; p.luck += 4; }, log: "ノープランで突撃。勢いが力になった" },
     ],
   },
   {
-    prompt: "意見が割れた。今夜の進路をどっちが決める？",
+    prompt: "相手からの返信が来ない。",
     choices: [
-      { label: "話し合って折衷案", tags: { 対話: 2, 歩み寄り: 1 }, effect: (p) => { p.def += 5; p.heal += 3; }, log: "折り合いをつけた。歩み寄りが守りを固めた" },
-      { label: "ジャンケンで即決", tags: { 歩み寄り: 1 },          effect: (p) => { p.luck += 8; }, log: "運任せで即決。妙な一体感で運が向いてきた" },
+      { label: "気にせず自分の時間",     tags: { 安定: 1, 冒険: 1 },  effect: (p) => { p.crit += 6; }, log: "どんと構えた。マイペースが冴えを生む" },
+      { label: "「何かあった？」と送る", tags: { 思いやり: 1, 対話: 1 }, effect: (p) => { p.heal += 5; p.def += 3; }, log: "そっと気にかけた。優しさが安心になった" },
     ],
   },
   {
-    prompt: "古い祭壇。願いを1つ捧げられる。",
+    prompt: "意見が割れた。今夜の進路はどっちが決める？",
     choices: [
-      { label: "強さを願う", tags: { 冒険: 1 },    effect: (p) => { p.atk += 8; }, log: "力を願った。二人の闘志が燃え上がる" },
-      { label: "絆を願う",   tags: { 思いやり: 2 }, effect: (p) => { p.heal += 6; p.def += 3; }, log: "絆を願った。穏やかな自信が二人を包む" },
-      { label: "幸運を願う", tags: { 歩み寄り: 1, 冒険: 1 }, effect: (p) => { p.luck += 12; p.crit += 3; }, log: "幸運を願った。追い風が吹き始めた" },
+      { label: "とことん話し合う",   tags: { 対話: 2, 歩み寄り: 1 }, effect: (p) => { p.def += 5; p.heal += 3; }, log: "納得いくまで話した。歩み寄りが守りを固めた" },
+      { label: "ジャンケンで即決",   tags: { 歩み寄り: 1, 冒険: 1 }, effect: (p) => { p.luck += 8; }, log: "運任せで即決。妙な一体感で運が向いてきた" },
     ],
   },
   {
-    prompt: "迷子の小動物がついてきた。",
+    prompt: "うっかり相手の地雷を踏んだ。",
     choices: [
-      { label: "連れていく", tags: { 思いやり: 2 }, effect: (p) => { p.heal += 7; p.hp = Math.min(p.maxHp, p.hp + 8); }, log: "連れていくことに。和みが二人を癒やした" },
-      { label: "見送る",     tags: { 安定: 1 },    effect: (p) => { p.crit += 6; }, log: "情を断って先を急ぐ。集中力が研ぎ澄まされた" },
+      { label: "すぐ謝って理由を聞く", tags: { 素直さ: 2, 対話: 1 }, effect: (p) => { p.def += 8; }, log: "素直に謝った。それが何より硬い盾になった" },
+      { label: "少し時間を置く",       tags: { 安定: 1 },            effect: (p) => { p.crit += 6; }, log: "一旦クールダウン。冷静さが研ぎ澄まされた" },
     ],
   },
   {
-    prompt: "謎かけの石碑。『二人の弱点を言え』",
+    prompt: "楽しみにしてた店が、まさかの定休日。",
     choices: [
-      { label: "正直に認める",   tags: { 素直さ: 3 }, effect: (p) => { p.def += 8; }, log: "弱さを認め合った。それが何より硬い盾になった" },
-      { label: "強がってみせる", tags: {},            effect: (p, rng) => { if (rng() < 0.5) { p.atk += 10; } else { p.hp -= 10; } }, log: "強がった。出方次第で吉とも凶とも転んだ" },
+      { label: "ノリで別の店を探す",   tags: { 冒険: 2 },            effect: (p) => { p.atk += 7; p.luck += 4; }, log: "その場で開拓。ハプニングも楽しめる二人" },
+      { label: "次こそはと予約し直す", tags: { 安定: 1, 歩み寄り: 1 }, effect: (p) => { p.def += 4; p.heal += 4; }, log: "仕切り直しを約束。堅実な絆が深まった" },
     ],
   },
   {
-    prompt: "細い吊り橋。どう渡る？",
+    prompt: "相手が「なんでもいいよ」と言った。",
     choices: [
-      { label: "手をつないで慎重に", tags: { 思いやり: 1, 安定: 1, 歩み寄り: 1 }, effect: (p) => { p.def += 6; p.hp = Math.min(p.maxHp, p.hp + 6); }, log: "手をつないで渡った。支え合いが安心を生んだ" },
-      { label: "一気に走り抜ける",   tags: { 冒険: 2 },                          effect: (p) => { p.atk += 7; p.luck += 4; }, log: "二人で駆け抜けた。勢いが力に変わった" },
+      { label: "じゃあ私が決める！", tags: { 冒険: 1, 歩み寄り: 1 }, effect: (p) => { p.atk += 6; }, log: "スパッとリード。決断力が場を動かした" },
+      { label: "いや一緒に選ぼうよ", tags: { 対話: 2 },            effect: (p) => { p.heal += 4; p.def += 3; }, log: "粘って一緒に選んだ。対話が絆を厚くした" },
     ],
   },
   {
-    prompt: "鏡の間。もう一組の自分たちが映る。",
+    prompt: "ケンカした。先に折れるのは？",
     choices: [
-      { label: "向き合って対話する", tags: { 対話: 2, 素直さ: 1 }, effect: (p) => { p.crit += 8; p.heal += 3; }, log: "鏡の自分と対話した。自己理解が冴えをもたらす" },
-      { label: "無視して進む",       tags: { 安定: 1 },            effect: (p) => { p.atk += 4; p.def += 4; }, log: "脇目もふらず進んだ。地に足のついた強さ" },
+      { label: "非があれば自分から", tags: { 素直さ: 2 }, effect: (p) => { p.def += 7; }, log: "自分から折れた。素直さが信頼を生んだ" },
+      { label: "まず相手の話を聞く", tags: { 思いやり: 2 }, effect: (p) => { p.heal += 7; }, log: "相手の気持ちを先に聞いた。寄り添いが癒やしに" },
     ],
   },
 ];
@@ -354,11 +354,11 @@ const EVENTS = [
 // --- 宝箱部屋（リスク/リワード） ------------------------------------------
 const TREASURES = [
   {
-    prompt: "豪華な宝箱を見つけた。",
+    prompt: "ちょっと高そうなお店を見つけた。",
     choices: [
-      { label: "勢いよく開ける",    tags: { 冒険: 2 },              effect: (p, rng) => { if (rng() < 0.7) { p.atk += 10; p.crit += 6; } else { p.hp -= 18; } }, log: "勢いで開けた。大当たりか、罠か——" },
-      { label: "慎重に調べてから",  tags: { 安定: 2 },              effect: (p) => { p.def += 5; p.heal += 4; }, log: "罠を確かめてから開けた。堅実な収穫" },
-      { label: "見送る",            tags: { 安定: 1, 歩み寄り: 1 }, effect: (p) => { p.luck += 7; }, log: "欲を出さず見送った。冷静さが運を呼ぶ" },
+      { label: "ノリで入っちゃう",     tags: { 冒険: 2 },              effect: (p, rng) => { if (rng() < 0.7) { p.atk += 10; p.crit += 6; } else { p.hp -= 18; } }, log: "勢いで入店。当たりか、財布の悲鳴か——" },
+      { label: "口コミを調べてから",   tags: { 安定: 2 },              effect: (p) => { p.def += 5; p.heal += 4; }, log: "下調べしてから入った。堅実な満足" },
+      { label: "今日はやめておく",     tags: { 安定: 1, 歩み寄り: 1 }, effect: (p) => { p.luck += 7; }, log: "欲を出さず見送った。冷静さが運を呼ぶ" },
     ],
   },
 ];
@@ -366,11 +366,11 @@ const TREASURES = [
 // --- 焚き火部屋（休息） ----------------------------------------------------
 const RESTS = [
   {
-    prompt: "焚き火を見つけた。少し休もう。",
+    prompt: "ふたりで一息。今夜はどう過ごす？",
     choices: [
-      { label: "しっかり休む", tags: { 安定: 1 },              effect: (p) => { p.hp = Math.min(p.maxHp, p.hp + 30); }, log: "じっくり体を休めた。HPが大きく回復" },
-      { label: "語り合う",     tags: { 対話: 2, 思いやり: 1 }, effect: (p) => { p.heal += 6; p.hp = Math.min(p.maxHp, p.hp + 10); }, log: "火を囲んで語り合った。絆が深まり心が満ちる" },
-      { label: "作戦を練る",   tags: { 対話: 1, 歩み寄り: 1 }, effect: (p) => { p.atk += 6; p.crit += 5; }, log: "次の戦いに備えた。連携が研ぎ澄まされた" },
+      { label: "とにかく寝て充電", tags: { 安定: 1 },              effect: (p) => { p.hp = Math.min(p.maxHp, p.hp + 30); }, log: "しっかり休んで充電。HPが大きく回復" },
+      { label: "夜通し語り合う",   tags: { 対話: 2, 思いやり: 1 }, effect: (p) => { p.heal += 6; p.hp = Math.min(p.maxHp, p.hp + 10); }, log: "夜通し語り合った。絆が深まり心が満ちる" },
+      { label: "明日の作戦会議",   tags: { 対話: 1, 歩み寄り: 1 }, effect: (p) => { p.atk += 6; p.crit += 5; }, log: "明日に備えて作戦会議。連携が研ぎ澄まされた" },
     ],
   },
 ];
@@ -537,18 +537,26 @@ function finalize(state) {
   const { self, partner, party, dungeon, log, reachedFloor, cleared, fellTo } = state;
   // Phase C: MBTI構造スコア × ゲーム行動スコアの合成
   const relStyle = deriveRelStyle(party.behaviorProfile);
-  const navScore = Object.values(party.behaviorProfile).reduce((s, v) => s + v, 0);
-  const navNorm = Math.min(20, navScore) / 20; // 0〜1
-  const blendedScore = Math.round(party.synergy.score * 0.5 + navNorm * 100 * 0.5);
-  const rank = calcRank(blendedScore);
+
+  // 名場面（今回の名シーン）= 直近の選択イベントを1つ拾ってシェア燃料にする
+  const choiceLogs = log.filter((l) => l.type === "event" || l.type === "treasure" || l.type === "rest");
+  const pickedScene = choiceLogs.length ? choiceLogs[choiceLogs.length - 1] : null;
+  const highlight = pickedScene
+    ? { prompt: pickedScene.prompt, choice: pickedScene.choice, result: pickedScene.result }
+    : null;
+  // v2 Verdict分離: スコア・ランクは「型ペアだけで決まる不変値」。
+  // 選択（behaviorProfile）はスコアに混ぜず、関係スタイル・名場面・鑑定文に反映する。
+  // → アプリ内／OG画像／SEOページで同じスコアが出る（シェアがブレない）。
+  const rank = calcRank(party.synergy.score);
   return {
     self, partner, cleared, reachedFloor,
     fellTo: fellTo || null,
     bonds: party.bonds,
     behaviorProfile: party.behaviorProfile,
     relStyle,
+    highlight,
     rank,
-    synergy: { ...party.synergy, blendedScore },
+    synergy: { ...party.synergy }, // blendedScore は廃止（score に一本化）
     wall: dungeon.wall,
     hpLeft: party.hp, maxHp: party.maxHp,
     log,
@@ -556,9 +564,19 @@ function finalize(state) {
 }
 
 // ===========================================================================
-//  鑑定文の生成（Gemini / 失敗時テンプレ）
+//  鑑定文の生成
+//  最小コスト運用: 既定はテンプレ鑑定（LLM不使用＝ランニング$0）。
+//   - 決めゼリフ・スコアは Verdict で固定
+//   - 鑑定文は relStyle（＝プレイ中の選択）で分岐して変化
+//  ライブGemini鑑定は generateDetailedReading() に分離し、
+//  将来「詳細鑑定」(リワード広告/課金ゲート)からのみ呼ぶ → 1プレイ毎の課金を断つ。
 // ===========================================================================
 async function generateReading(result) {
+  return templateReading(result);
+}
+
+// 任意の本格鑑定（ライブGemini）。広告/課金ゲートの後ろからのみ呼ぶこと。
+async function generateDetailedReading(result) {
   try {
     const res = await fetch("/api/reading", {
       method: "POST",
@@ -599,10 +617,11 @@ function buildReadingPayload(r) {
       fellTo: r.fellTo,
       bonds: r.bonds,
       archetype: s.archetype,
-      score: s.blendedScore !== undefined ? s.blendedScore : s.score,
+      score: s.score,                         // v2: 型ペア固定の相性スコア
       wallTheme: s.wallTheme,
-      relStyle: r.relStyle || null,           // Phase C: 行動から導いた関係スタイル
-      behaviorHighlights: profileHighlights,  // Phase C: 選択傾向サマリ
+      relStyle: r.relStyle || null,           // 行動から導いた関係スタイル（選択で変わる）
+      behaviorHighlights: profileHighlights,  // 選択傾向サマリ（選択で変わる）
+      highlight: r.highlight || null,         // §8: 今回の名シーン（選択で変わる）
       functions: s.axes.map((a) => ({
         theme: a.theme, you: a.functions[0], them: a.functions[1],
         relation: RELATION_JA[a.relation] || a.relation,
@@ -617,47 +636,102 @@ function buildReadingPayload(r) {
   };
 }
 
-// --- フォールバック鑑定（API無しでも動く・3観点付き） --------------------
+// --- テンプレ鑑定（LLM不使用・$0／relStyleで分岐＝選択で文面が変わる） ----
+//  決めゼリフ・スコアは固定（Verdict）、3観点は relStyle（プレイの選択）で変化。
+//  トーンは §7 と統一：具体シーンを名指し・あるあるを言い切り・最後に救う。
+const TEMPLATE_READINGS = {
+  対話: {
+    work:    (a, b) => `仕事で意見が割れても、${a}と${b}は納得いくまで話せる強さがある。ただし会議が長引いて「で、結論は？」になりがち。時間を区切るとキレが出る。`,
+    romance: (a, b) => `ケンカしても${a}と${b}は言葉でぶつかれるから、沈黙が短い。ただし正論で詰めすぎると相手が黙る。気持ちを先に言うと丸く収まる。`,
+    friends: (a, b) => `${a}と${b}は何でも話せて、気づけば朝。語りすぎ注意だけど、その時間こそ2人の財産。`,
+  },
+  素直さ: {
+    work:    (a, b) => `「ここ分からない」を素直に言い合える${a}と${b}は、ミスを早めに潰せる。ただ気を使って抱え込むと逆効果。困ったら即共有が吉。`,
+    romance: (a, b) => `弱さを見せ合えるから、${a}と${b}は深く繋がれる。ただし甘えすぎて依存気味になることも。お互いの一人時間も大事に。`,
+    friends: (a, b) => `見栄を張らない楽な関係の${a}と${b}。たまに本音が刺さりすぎるので、言い方だけ気をつければ最高の相棒。`,
+  },
+  思いやり: {
+    work:    (a, b) => `${a}と${b}はお互いの負担をさりげなく気にかける。和むけど、遠慮し合って締切ギリギリになりがち。役割を先に決めると安定する。`,
+    romance: (a, b) => `相手を優先しすぎて、${a}と${b}は言いたいことを我慢→ある日爆発、のパターンに注意。小さな不満こそその都度どうぞ。`,
+    friends: (a, b) => `困ったとき真っ先に駆けつけ合える${a}と${b}。遠慮しすぎて頼れないこともあるけど、その優しさが絆の土台。`,
+  },
+  冒険: {
+    work:    (a, b) => `「とりあえずやってみよう」で前に進める${a}と${b}。勢い余って詰めが甘くなることも。最後の確認役を決めておくと安心。`,
+    romance: (a, b) => `デートも勢いで決めて楽しめる${a}と${b}。ノリで突っ走って後悔も早いので、たまに立ち止まって確認を。それでも一緒なら笑い話。`,
+    friends: (a, b) => `「やってみよう！」が合言葉の刺激コンビ、${a}と${b}。突っ走りすぎて後悔も2人分。でもその無茶が最高の思い出になる。`,
+  },
+  安定: {
+    work:    (a, b) => `手堅く積み上げる${a}と${b}。安定感は抜群だけど、変化への一歩が遅れがち。たまに新しいやり方を試すと一気に伸びる。`,
+    romance: (a, b) => `一緒にいて落ち着く、長続きタイプの${a}と${b}。油断するとマンネリに。記念日や小さな非日常で火を絶やさないで。`,
+    friends: (a, b) => `一緒にいてラクな、長い付き合い向きの${a}と${b}。たまに新しい遊びを入れると、関係がもっと色づく。`,
+  },
+  歩み寄り: {
+    work:    (a, b) => `どっちが正しいかより、どう進めるかを選べる${a}と${b}。揉めにくい反面、本音の対立を避けて問題が残ることも。たまには本気でぶつかって。`,
+    romance: (a, b) => `折り合いが上手で揉めにくい${a}と${b}。でも遠慮が募ると距離になる。たまにワガママを言い合うくらいがちょうどいい。`,
+    friends: (a, b) => `衝突を上手く避けるいい距離感の${a}と${b}。たまには遠慮なくぶつかると、もっと深い仲になれる。`,
+  },
+};
+
 function templateReading(r) {
   const a = r.self.name, b = r.partner.name;
   const s = r.synergy;
-  const arch = s.archetype.name;
-  const styleLabel = r.relStyle ? r.relStyle.label : "";
-  const comp  = s.axes.filter((x) => x.relation === "complement");
-  const blind = s.axes.filter((x) => x.relation === "blind");
-  const score = s.blendedScore !== undefined ? s.blendedScore : s.score;
+  const relKey = (r.relStyle && r.relStyle.key) || "歩み寄り";
+  const set = TEMPLATE_READINGS[relKey] || TEMPLATE_READINGS["歩み寄り"];
 
-  const summary = r.cleared
-    ? `${a}と${b}は「${arch}」×「${styleLabel}」。ダンジョンを踏破した2人の絆は本物。`
-    : `${a}と${b}は「${arch}」×「${styleLabel}」。${r.reachedFloor}階で足を止めたが、越える力は確かにある。`;
+  // 決めゼリフ（Verdict・固定）をサマリーにも使い、全面で一貫させる
+  const summary = punchlineFor(r.self.type, r.partner.type, s);
 
-  const compTheme = comp.length ? comp[0].theme : "互いの違い";
-  const blindTheme = blind.length ? blind[0].theme : s.wallTheme;
-  const relKey = r.relStyle?.key || "";
-
-  const work = comp.length
-    ? `仕事では${compTheme}のアプローチが正反対で、役割分担がしやすい。ただし方向性の違いで衝突しがち。意見が割れたら早めに話し合うと長続きする。`
-    : relKey === "対話"
-    ? `仕事では意見が割れても話し合える${a}と${b}。ただし対話に時間をかけすぎて決断が遅くなりがち。期限を決めて動く意識が大切。`
-    : `仕事では似た強みを持つ${a}と${b}。スピードは出るが「${blindTheme}」が2人共通の盲点になりやすい。そこだけ第三者の意見を取り入れると安心。`;
-
-  const romance = s.archetype.key === "dual"
-    ? `恋愛では、${a}が動けば${b}が受け止め、補い合う引力がある。ただし正反対ゆえにすれ違いも起きやすく、「なんで分かってくれないの」となりがち。相手の視点を一度受け入れてから話すといい。`
-    : relKey === "素直さ"
-    ? `恋愛では弱さをさらけ出せるから深く繋がれる。ただし弱さを見せすぎて依存気味になることも。お互いの自立した部分も大切にして。`
-    : relKey === "思いやり"
-    ? `恋愛では互いに相手を優先しやすい。ただし言いたいことを我慢しすぎて、ある日爆発するパターンに注意。小さな不満はその都度正直に伝えて。`
-    : s.archetype.key === "twin"
-    ? `恋愛では深く共鳴できる半面、似すぎて「言わなくても分かるでしょ」になりがち。実は伝わっていないことが積み重なりやすい。言葉にする習慣をつけると関係が安定する。`
-    : `恋愛では凸凹が魅力になる2人。ただし価値観の違いから「どうしてそう考えるの？」と感じる場面も。違いを否定せず面白がれるかがポイント。`;
-
-  const friends = relKey === "冒険"
-    ? `友達としては「やってみようよ！」が合言葉の刺激的な組み合わせ。ただしノリだけで突っ走ると後悔も早い。たまには立ち止まって確認し合うことが長続きの秘訣。`
-    : relKey === "安定"
-    ? `友達としては一緒にいて落ち着ける、長く続く安心感がある。ただし変化を嫌うあまり同じパターンにはまりがち。たまには新しいことを試してみると関係に刺激が生まれる。`
-    : `友達としては${score >= 70 ? "一緒にいて心地よい" : "ときどきズレるけどそれが面白い"}関係。「${blindTheme}」は2人とも苦手なので、そこで頼り合いすぎると判断を誤ることも。その場面だけは外の視点を借りるのがおすすめ。`;
-
-  return { text: summary, work, romance, friends, source: "template" };
+  return {
+    text: summary,
+    work:    set.work(a, b),
+    romance: set.romance(a, b),
+    friends: set.friends(a, b),
+    source: "template",
+  };
 }
 
-window.MBTIDungeon = { TYPES, STACKS, analyzeSynergy, runDungeon, runDungeonGen, generateReading };
+// ===========================================================================
+//  決めゼリフ（Punchline）— ブラウザ側ミラー
+//  ⚠ lib/verdict.mjs の PUNCHLINES と同一内容を保つこと（編集時は両方）。
+//  シェアカード(main.js)で使う。決定論・型ペアのみ依存（Verdict層）。
+// ===========================================================================
+const PUNCHLINES = {
+  dual: {
+    N: "{a}と{b}、正反対なのに噛み合う名コンビ。ただし『で、将来どうする？』の話だけは二人とも見て見ぬふり。",
+    S: "{a}と{b}は凸凹が完璧にハマる二人。なのに現実的な段取りになると、急にお互い顔を見合わせる。",
+    T: "{a}と{b}、違うからこそ惹かれ合う。ただ『どっちが正しい問題』になると決着まで一晩かかる。",
+    F: "{a}と{b}は理屈で最強タッグ。でも『気持ちの話』になった瞬間、二人して固まる。",
+  },
+  twin: {
+    N: "{a}も{b}も同じ温度。分かりすぎて楽。でも『誰か先を決めて』と二人で待ち続ける。",
+    S: "{a}×{b}、感覚がそっくりで居心地は最高。ただし二人ともうっかり者、忘れ物も連帯責任。",
+    T: "{a}と{b}は脳内が同じ。話は早い。けど『どっちも譲らない論破合戦』も同じ強さ。",
+    F: "{a}も{b}も気持ち優先の似た者同士。共感は無限。でも言いにくいことは永遠に言わないまま。",
+  },
+  yin_yang: {
+    N: "{a}が走り出し、{b}が現実に引き戻す。いいバランス。なのに『その先の計画』は二人とも空欄。",
+    S: "{a}×{b}は役割分担が天才的。片方の苦手を片方が拾う。ただ詰めの作業だけは譲り合いがち。",
+    T: "{a}と{b}、片方が決めて片方が和ませる名コンビ。揉めても最後はなぜか丸く収まる。",
+    F: "{a}が引っ張り{b}が支える二人。頼れる関係。でも本音のケアだけは、つい後回し。",
+  },
+  blindspot: {
+    N: "似た者の{a}×{b}。通じ合うけど『で、どうする？』を二人で放置して、同じ穴に落ちる。",
+    S: "{a}と{b}、波長は完璧。ただし二人とも地に足つかず、現実が後ろから追いついてくる。",
+    T: "{a}×{b}は分かり合える。でも白黒つける場面を二人で避けて、問題だけが育っていく。",
+    F: "{a}も{b}も優しい。だから言いにくいことを言わず、小さな我慢が静かに積もる。",
+  },
+  mix: {
+    N: "{a}×{b}はバランス型。場面次第で化ける。ただ『将来の話』だけは二人とも腰が重い。",
+    S: "{a}と{b}、状況対応は上手い二人。でも地味な段取りになると急に静かになる。",
+    T: "{a}×{b}は調整上手。なのに肝心の決断は『どっちでもいい』の譲り合いでループ。",
+    F: "{a}と{b}はそつなくいい関係。ただ深い感情の話になると、お互い一歩引きがち。",
+  },
+};
+function punchlineFor(typeA, typeB, syn) {
+  const s = syn || analyzeSynergy(typeA, typeB);
+  const byArch = PUNCHLINES[s.archetype.key] || PUNCHLINES.mix;
+  const tmpl = byArch[s.wall] || byArch.N;
+  return tmpl.replace(/\{a\}/g, typeA).replace(/\{b\}/g, typeB);
+}
+
+window.MBTIDungeon = { TYPES, STACKS, analyzeSynergy, punchlineFor, runDungeon, runDungeonGen, generateReading, generateDetailedReading };

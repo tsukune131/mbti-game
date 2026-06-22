@@ -5,9 +5,11 @@
   "type": "module",
   "description": "MBTI×ローグライク相性占い — 2人でダンジョンをクリアできるか？",
   "scripts": {
+    "build": "node scripts/build-static.mjs",
     "deploy": "vercel deploy --prod"
   },
   "dependencies": {
-    "@google/genai": "^2.9.0"
+    "@google/genai": "^2.9.0",
+    "@vercel/og": "^0.11.1"
   }
 }
