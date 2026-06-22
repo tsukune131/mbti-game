@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2人で挑む相性ダンジョン｜16タイプ性格占い</title>
+  <meta name="description" content="あなたと気になるあの人。2人でダンジョンをクリアできる？ 16タイプ性格でわかる相性占いゲーム。" />
+  <meta property="og:title" content="2人で挑む相性ダンジョン｜MBTI相性占いゲーム" />
+  <meta property="og:description" content="気になるあの人とのMBTI相性をローグライクで体験。ダンジョンを踏破できるか？ 結果は仕事・恋愛・友達の3観点で鑑定。" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="2人で挑む相性ダンジョン｜MBTI相性占いゲーム" />
+  <meta name="twitter:description" content="気になるあの人とのMBTI相性をローグライクで体験。ダンジョンを踏破できるか？" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <!-- 入力画面 -->
+    <section id="screen-input" class="screen">
+      <h1 class="title">2人で挑む<br />相性ダンジョン</h1>
+      <p class="lead">あなたと、気になるあの人。<br />2人でダンジョンをクリアできる？</p>
+
+      <div class="form">
+        <div class="char-card">
+          <span class="char-label">あなた</span>
+          <input id="self-name" class="name-input" type="text" placeholder="なまえ" maxlength="8" />
+          <div class="type-grid" id="self-type-grid"></div>
+          <input type="hidden" id="self-type" value="INFP" />
+        </div>
+
+        <div class="vs">×</div>
+
+        <div class="char-card">
+          <span class="char-label">連れていく人</span>
+          <input id="partner-name" class="name-input" type="text" placeholder="なまえ" maxlength="8" />
+          <div class="type-grid" id="partner-type-grid"></div>
+          <input type="hidden" id="partner-type" value="ENFJ" />
+        </div>
+      </div>
+
+      <button id="start-btn" class="primary-btn">ダンジョンに挑む</button>
+      <p class="hint">※生年月日も名前(画数)も不要。性格タイプだけで占います。</p>
+
+      <div id="history-section" class="history-section hidden"></div>
+    </section>
+
+    <!-- 進行画面 -->
+    <section id="screen-run" class="screen hidden">
+      <h2 id="run-heading" class="run-heading"></h2>
+      <canvas id="battle-canvas" width="480" height="160"></canvas>
+      <div id="log" class="log"></div>
+      <div id="choices" class="choices hidden"></div>
+      <div class="run-actions">
+        <button id="next-btn" class="primary-btn hidden">次へ</button>
+        <span id="run-spinner" class="spinner hidden">鑑定中…</span>
+      </div>
+    </section>
+
+    <!-- 結果画面 -->
+    <section id="screen-result" class="screen hidden">
+      <canvas id="result-card" width="640" height="640"></canvas>
+      <div id="rank-display" class="hidden"></div>
+      <div id="reading-sections" class="reading-sections"></div>
+      <div class="result-actions">
+        <button id="share-btn" class="primary-btn">Xでシェア</button>
+        <button id="save-btn" class="ghost-btn">画像を保存</button>
+        <button id="retry-btn" class="ghost-btn">もう一度</button>
+      </div>
+      <p id="reading-source" class="source-note"></p>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+  <script src="dungeon-scene.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

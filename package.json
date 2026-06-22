@@ -1,0 +1,13 @@
+{
+  "name": "mbti-dungeon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MBTI×ローグライク相性占い — 2人でダンジョンをクリアできるか？",
+  "scripts": {
+    "deploy": "vercel deploy --prod"
+  },
+  "dependencies": {
+    "@google/genai": "^2.9.0"
+  }
+}

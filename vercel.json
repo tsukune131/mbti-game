@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/type/:pair", "destination": "/api/pair?pair=:pair" }
+  ]
+}
