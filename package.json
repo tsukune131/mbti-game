@@ -6,7 +6,7 @@
   "description": "MBTI×ローグライク相性占い — 2人でダンジョンをクリアできるか？",
   "scripts": {
     "build": "node scripts/build-static.mjs",
-    "deploy": "vercel deploy --prod"
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@google/genai": "^2.9.0",
